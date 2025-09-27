@@ -3,4 +3,5 @@
 # DOMAIN,exact.example.com - 精确匹配
 # DOMAIN-KEYWORD,keyword - 包含关键词的域名
 DOMAIN-SUFFIX,heiyu.space
-IP-CIDR,192.168.10.25/32
+DOMAIN-SUFFIX,youtube.com
+#IP-CIDR,192.168.10.25/32
