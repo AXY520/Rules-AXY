@@ -1,5 +1,6 @@
 # 自定义直连域名列表
-# 格式：每行一个域名，支持通配符
+# DOMAIN-SUFFIX,example.com - 匹配 *.example.com 和 example.com
+# DOMAIN,exact.example.com - 精确匹配
+# DOMAIN-KEYWORD,keyword - 包含关键词的域名
 DOMAIN-SUFFIX,heiyu.space
 DOMAIN-SUFFIX,youtube.com
-# 可以添加更多直连域名
