@@ -2,6 +2,7 @@
 # DOMAIN-SUFFIX,example.com - 匹配 *.example.com 和 example.com
 # DOMAIN,exact.example.com - 精确匹配
 # DOMAIN-KEYWORD,keyword - 包含关键词的域名
+DOMAIN-KEYWORD,heiyu
 DOMAIN-SUFFIX,heiyu.space
 DOMAIN-SUFFIX,youtube.com
 #IP-CIDR,192.168.10.25/32
