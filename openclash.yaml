@@ -3,8 +3,8 @@
 # 跑裸核用户请自行去掉下方控制面板模块的注释。
 # 机场订阅
 proxy-providers:
-  西部数据:
-    url: "https://lalala.aixinyin.asia/9864e384-df45-4c28-9186-270b3676ca3e/pty"
+  link:
+    url: "订阅链接"
     type: http
     interval: 86400
     health-check:
