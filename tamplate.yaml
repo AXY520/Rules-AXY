@@ -1,0 +1,250 @@
+# 🚀 全局配置部分
+port: 7890
+socks-port: 7891
+redir-port: 7892
+mixed-port: 7893
+tproxy-port: 7894
+allow-lan: true
+bind-address: "*"
+ipv6: false
+unified-delay: true
+tcp-concurrent: true
+log-level: warning
+find-process-mode: "off"
+global-client-fingerprint: chrome
+keep-alive-idle: 600
+keep-alive-interval: 15
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+# 🔁 嗅探模块
+sniffer:
+  enable: true
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
+  force-domain:
+    - "+.v2ex.com"
+  skip-domain:
+    - "+.baidu.com"
+
+# 🌐 DNS 模块
+dns:
+  enable: true
+  listen: 0.0.0.0:1053
+  ipv6: false
+  respect-rules: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 28.0.0.1/8
+  fake-ip-filter-mode: blacklist
+  fake-ip-filter:
+    - "rule-set:private_domain,cn_domain"
+    - "+.msftconnecttest.com"
+    - "+.msftncsi.com"
+    - "time.*.com"
+    - "+.market.xiaomi.com"
+  default-nameserver:
+    - 223.5.5.5
+  proxy-server-nameserver:
+    - https://223.5.5.5/dns-query
+  nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+
+# 📥 订阅提供商模块 (代理来源)
+proxy-providers:
+  link:
+    url: URL_SUBSCRIBE  # ← 替换成你的订阅链接
+    type: http
+    interval: 86400
+    health-check:
+      enable: true
+      url: https://www.gstatic.com/generate_204
+      interval: 300
+    proxy: 直连
+
+# 🧰 出站策略组（Groups）
+proxy-groups:
+  - name: 默认代理
+    type: select
+    use:
+      - link
+    proxies:
+      - 香港自动
+      - 日本自动
+      - 新加坡自动
+      - 自动选择
+      - 香港节点
+      - 日本节点
+      - 新加坡节点
+      - 所有节点
+      - 直连
+
+  - name: YouTube
+    type: select
+    use:
+      - link
+    proxies:
+      - 美国自动
+      - 自动选择
+      - 美国节点
+      - 所有节点
+      - 直连
+
+  - name: TikTok
+    type: select
+    use:
+      - link
+    proxies:
+      - 东南亚自动
+      - 国际自动
+      - 自动选择
+      - 东南亚节点
+      - 国际节点
+      - 所有节点
+      - 直连
+
+  - name: Telegram
+    type: select
+    use:
+      - link
+    proxies:
+      - 欧美自动
+      - 自动选择
+      - 欧美节点
+      - 所有节点
+      - 直连
+
+  - name: Netflix
+    type: select
+    use:
+      - link
+    proxies:
+      - 欧美自动
+      - 美西
+      - 自动选择
+      - 欧美节点
+      - 所有节点
+      - 直连
+
+  - name: 广告拦截
+    type: select
+    proxies:
+      - DIRECT
+      - REJECT
+
+  - name: 漏网之鱼
+    type: select
+    use:
+      - link
+    proxies:
+      - 默认代理
+      - 自动选择
+      - 所有节点
+      - 直连
+
+  - name: 自动选择
+    type: url-test
+    use:
+      - link
+    tolerance: 20
+    interval: 300
+    filter: "^((?!(直连)).)*$"
+
+  - name: 香港自动
+    type: url-test
+    use:
+      - link
+    tolerance: 20
+    interval: 300
+    filter: "(?=.*(港|HK))^((?!(台|日|韩|新|美)).)*$"
+
+  - name: 日本自动
+    type: url-test
+    use:
+      - link
+    tolerance: 20
+    interval: 300
+    filter: "(?=.*(日|JP))^((?!(港|台|韩|新|美)).)*$"
+
+  - name: 新加坡自动
+    type: url-test
+    use:
+      - link
+    tolerance: 20
+    interval: 300
+    filter: "(?=.*(新加坡|SG))^((?!(港|台|日|韩|美)).)*$"
+
+  - name: 美国自动
+    type: url-test
+    use:
+      - link
+    tolerance: 20
+    interval: 300
+    filter: "(?=.*(美国|US|United States))^((?!(港|台|日|韩|新)).)*$"
+
+  - name: 所有节点
+    type: select
+    include-all: true
+
+  - name: 香港节点
+    type: select
+    include-all: true
+    filter: "(?i)HK|Hong Kong|Hongkong|港澳台"
+
+  - name: 日本节点
+    type: select
+    include-all: true
+    filter: "(?i)JP|Japan"
+
+  - name: 新加坡节点
+    type: select
+    include-all: true
+    filter: "(?i)SG|Singapore|狮城"
+
+  - name: 美国节点
+    type: select
+    include-all: true
+    filter: "(?i)US|United States|美洲"
+
+# 🚨 规则匹配模块
+rules:
+  - RULE-SET,private_ip,直连,no-resolve
+  - RULE-SET,private_domain,直连
+  - DOMAIN-SUFFIX,qichiyu.com,默认代理
+  - RULE-SET,proxylite,默认代理
+  - RULE-SET,AI,AI
+  - RULE-SET,youtube,Youtube
+  - RULE-SET,microsoft,Microsoft
+  - RULE-SET,TikTok,TikTok
+  - RULE-SET,Telegram,Telegram
+  - RULE-SET,Netflix,Netflix
+  - RULE-SET,paypal,PayPal
+  - RULE-SET,cn,CN
+  - MATCH,漏网之鱼
+
+# 🌀 混合模式入口配置（TUN）
+tun:
+  enable: true
+  stack: mixed
+  dns-hijack: ["any:53", "tcp://any:53"]
+  auto-route: false
+  auto-redirect: false
+  auto-detect-interface: false
+
+# 🔒 规则集定义（Rule Providers）
+rule-provider:
+  ai: {type: http, behavior: domain, format: mrs, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs"}
+  youtube: {type: http, behavior: classical, format: text, url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/YouTube/YouTube.list"}
+  microsoft: {type: http, behavior: domain, format: mrs, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/microsoft.mrs"}
+  tiktok: {type: http, behavior: domain, format: mrs, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/tiktok.mrs"}
+  telegram: {type: http, behavior: domain, format: mrs, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs"}
+  netflix: {type: http, behavior: domain, format: mrs, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/netflix.mrs"}
+  paypal: {type: http, behavior: domain, format: mrs, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/paypal.mrs"}
+  cn: {type: http, behavior: domain, format: mrs, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cn.mrs"}
