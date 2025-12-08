@@ -4,17 +4,14 @@
 
 1. 打开 Loon，底部选择 **配置** → **高级配置**
 
-  ![配置截图](https://pic1.imgdb.cn/item/6936bc4a2a4ee13cb951c8cd.png)
+   ![配置截图](https://pic1.imgdb.cn/item/6936bc4a2a4ee13cb951c8cd.png)
 
 2. 需要修改以下三项设置：
    - **IP Stack**
    - **绕过路由**
    - **代理模式**
 
-   ![配置截图](https://pic1.imgdb.cn/item/6936bc4a2a4ee13cb951c8d0.png)
-
-   ![配置截图](https://pic1.imgdb.cn/item/6936bc4a2a4ee13cb951c8ce.png)
-
+   ![配置截图](https://pic1.imgdb.cn/item/6936bc4a2a4ee13cb951c8d0.png) ![配置截图](https://pic1.imgdb.cn/item/6936bc4a2a4ee13cb951c8ce.png)
 3. **IP Stack 设置**
    - 点击 **IP Stack**
    - 更改查询模式为 **IPv4&IPv6**
