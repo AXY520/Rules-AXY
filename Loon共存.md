@@ -3,15 +3,12 @@
 ## 操作步骤
 
 #### 1. 打开 Loon，底部选择 **配置** → **高级配置**
+####    需要修改以下三项设置：
+        - **IP Stack**
+        - **绕过路由**
+        - **代理模式**
 
-![配置截图](https://pic1.imgdb.cn/item/6936bc4a2a4ee13cb951c8cf.png)
-
-#### 2. 需要修改以下三项设置：
-- **IP Stack**
-- **绕过路由**
-- **代理模式**
-
-![配置截图](https://pic1.imgdb.cn/item/6936bc4a2a4ee13cb951c8cd.png)
+![配置截图](https://pic1.imgdb.cn/item/6936bc4a2a4ee13cb951c8cf.png) ![配置截图](https://pic1.imgdb.cn/item/6936bc4a2a4ee13cb951c8cd.png)
 
 #### 3. **IP Stack 设置**
 - 点击 **IP Stack**
@@ -29,7 +26,6 @@
 
 #### 5. **懒猫微服设置**
 - 保存 Loon 配置后，在懒猫微服中的网络模式中，将 **VPN** 切换为 **Proxy**
+- **重启手机客户端即可直连**
 
 ![配置截图](https://pic1.imgdb.cn/item/6936bc4a2a4ee13cb951c8d1.png)
-
-#### 6. **重启手机客户端即可直连**
