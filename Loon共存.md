@@ -4,9 +4,9 @@
 
 #### 1. 打开 Loon，底部选择 **配置** → **高级配置**
 ####    需要修改以下三项设置：
-        - **IP Stack**
-        - **绕过路由**
-        - **代理模式**
+- **IP Stack**
+- **绕过路由**
+- **代理模式**
 
 ![配置截图](https://pic1.imgdb.cn/item/6936bc4a2a4ee13cb951c8cf.png) ![配置截图](https://pic1.imgdb.cn/item/6936bc4a2a4ee13cb951c8cd.png)
 
