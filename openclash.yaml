@@ -1,205 +1,233 @@
-# 必读！！！
-# 注意规则在满足自己需求情况下，尽量做到精简，不要过度复杂，以免影响性能。
-# 跑裸核用户请自行去掉下方控制面板模块的注释。
-# 机场订阅
 proxy-providers:
-  link:
-    url: "订阅链接"
+  all-proxies:
     type: http
-    interval: 86400
-    health-check:
-      enable: true
-      url: https://www.gstatic.com/generate_204
-      interval: 300
-    proxy: 直连
+    url: "https://example.com/your-subscription-url"
+    interval: 3600
+    path: ./providers/all-proxies.yaml
+    health-check: {enable: true, interval: 600, url: http://www.gstatic.com/generate_204}
 
 # 节点信息
 proxies:
-  - {name: 直连, type: direct}
+  - {name: DIRECT, type: direct}
 
 # 全局配置 
 port: 7890
 socks-port: 7891
 redir-port: 7892
-mixed-port: 7893
+mixed-port: 7890
 tproxy-port: 7894
 allow-lan: true
 bind-address: "*"
-ipv6: false
+ipv6: true
 unified-delay: true
 tcp-concurrent: true
-# interface-name: enp6s18
-log-level: warning
-find-process-mode: 'off'
-global-client-fingerprint: chrome
-keep-alive-idle: 600
-keep-alive-interval: 15
+log-level: info
+external-controller: :9090
+experimental: {ignore-resolve-fail: true}
+
 profile:
   store-selected: true
   store-fake-ip: true
-
-# 为防止使用插件朋友遇到面板问题，我注释掉了此模块。
-# 跑裸核自行删除注释即可，使用nikki仅内核的ui路径改为/etc/nikki/run/ui
-#external-controller: 0.0.0.0:9090
-#secret: ""
-#external-ui: "/etc/mihomo/ui"
-#external-ui-name: zashboard
-#external-ui-url: "https://github.com/Zephyruso/zashboard/archive/refs/heads/gh-pages.zip"
 
 # 嗅探
 sniffer:
   enable: true
   sniff:
-    HTTP:
-      ports: [80, 8080-8880]
-      override-destination: true
-    TLS:
-      ports: [443, 8443]
-    QUIC:
-      ports: [443, 8443]
-  force-domain:
-    - "+.v2ex.com"
-  skip-domain:
-    - "+.baidu.com"
+    HTTP: {ports: [80, 8080-8880], override-destination: true}
+    TLS: {ports: [443, 8443]}
+    QUIC: {ports: [443, 8443]}
 
 # 入站  
 tun:
   enable: true
-  # system/gvisor/mixed
   stack: mixed
   dns-hijack: ["any:53", "tcp://any:53"]
-  #使用nikki，混入全部不修改的情况，开启接口指定为nikki
-  #使用仅内核自行修改下面三项为true
-  #device: nikki
   auto-route: false
   auto-redirect: false
   auto-detect-interface: false
+  route-exclude-address:
+    - 6.6.6.6/32
+    - 2000::6666/128
 
-
-
-# # DNS模块
+# DNS模块
 dns:
   enable: true
+  listen: 127.0.0.1:1053
+  ipv6: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 28.0.0.1/8
+  fake-ip-filter: ["*.lan", "*.localdomain", "*.example", "*.invalid", "*.localhost", "*.test", "*.local", "*.home.arpa", "time.*.com", "time.*.gov", "time.*.edu.cn", "time.*.apple.com", "time1.*.com", "time2.*.com", "time3.*.com", "time4.*.com", "time5.*.com", "time6.*.com", "time7.*.com", "ntp.*.com", "ntp1.*.com", "ntp2.*.com", "ntp3.*.com", "ntp4.*.com", "ntp5.*.com", "ntp6.*.com", "ntp7.*.com", "*.time.edu.cn", "*.ntp.org.cn", "+.pool.ntp.org", "time1.cloud.tencent.com", "music.163.com", "*.music.163.com", "*.126.net", "musicapi.taihe.com", "music.taihe.com", "songsearch.kugou.com", "trackercdn.kugou.com", "*.kuwo.cn", "api-jooxtt.sanook.com", "api.joox.com", "joox.com", "y.qq.com", "*.y.qq.com", "streamoc.music.tc.qq.com", "mobileoc.music.tc.qq.com", "isure.stream.qqmusic.qq.com", "dl.stream.qqmusic.qq.com", "aqqmusic.tc.qq.com", "amobile.music.tc.qq.com", "*.xiami.com", "*.music.migu.cn", "music.migu.cn", "+.msftconnecttest.com", "+.msftncsi.com", "msftconnecttest.com", "msftncsi.com", "localhost.ptlogin2.qq.com", "localhost.sec.qq.com", "+.srv.nintendo.net", "+.stun.playstation.net", "xbox.*.microsoft.com", "xnotify.xboxmojie.app", "+.ipv6.microsoft.com", "+.battlenet.com.cn", "+.wotgame.cn", "+.wggames.cn", "+.wowsgame.cn", "+.wargaming.net", "proxy.golang.org", "stun.*.*", "stun.*.*.*", "+.stun.*.*", "+.stun.*.*.*", "+.stun.*.*.*.*", "heartbeat.belkin.com", "*.linksys.com", "*.linksyssmartwifi.com", "*.router.asus.com", "mesu.apple.com", "swscan.apple.com", "swquery.apple.com", "swdownload.apple.com", "swcdn.apple.com", "swdist.apple.com", "lens.l.google.com", "stun.l.google.com", "*.square-enix.com", "*.finalfantasyxiv.com", "*.ffxiv.com", "*.ff14.sdo.com", "ff.dorado.sdo.com", "*.mcdn.bilivideo.cn", "+.media.dssott.com", "+.pvp.net"]
+  default-nameserver: [114.114.114.114, 223.5.5.5, 119.29.29.29]
+  nameserver: [tls://223.5.5.5:853, tls://223.6.6.6:853, https://doh.pub/dns-query, https://dns.alidns.com/dns-query]
+  always-real-ip:
+    - "*.heiyu.space"
+    - "*.lazycat.cloud"
 
-  default-nameserver:      #基础DNS服务器，必须先有它才能使用域名类型的DNS配置，因此必须为IP，此处使用阿里云DNS
-    - tls://223.5.5.5
-    - tls://223.6.6.6
-  nameserver:         #在访问的国外网站没有匹配到任何域名规则，最终走了MATCH兜底规则时使用的DNS，为了确保不发生DNS泄漏和DNS污染，必须使用国外DNS
-    - https://cloudflare-dns.com/dns-query
-    - https://dns.google/dns-query
-  proxy-server-nameserver:         #解析代理节点时使用的DNS，为了使下面的respect-rules生效必须设置，最好设置为国内DNS，否则在代理的第一步就可能因为连接不上国外DNS而解析不出代理节点的IP，最终倒在起点
-    - https://dns.alidns.com/dns-query
-    - https://doh.pub/dns-query
-  direct-nameserver:           #规则匹配到直连时使用的DNS，既然是可以直连的，当然要用国内DNS
-    - https://dns.alidns.com/dns-query
-    - https://doh.pub/dns-query
-  respect-rules: true      #让连接DNS服务器时能够遵循规则，也就是通过代理节点连接到上面设置的国外DNS，因为直连可能连接不上
-#   listen: 0.0.0.0:1053
-#   ipv6: false
-#   respect-rules: true
-#   enhanced-mode: fake-ip
-#   fake-ip-range: 28.0.0.1/8
-#   fake-ip-filter-mode: blacklist
-#   fake-ip-filter:
-#     - "rule-set:private_domain,cn_domain"
-#     - "+.msftconnecttest.com"
-#     - "+.msftncsi.com"
-#     - "time.*.com"
-#     - "+.market.xiaomi.com"
-#   default-nameserver:
-#     - 223.5.5.5
-#   proxy-server-nameserver:
-#     - https://223.5.5.5/dns-query
-#   # namesever尽量用运营商提供的DNS
-#   nameserver:
-#     - 223.5.5.5
-#     - 119.29.29.29
- 
-# 出站策略，根据自己情况调整每个策略里分组排序，增删都可以，比如把美国自动放到第一个，比如删除香港故转，注意别漏掉表情逗号等。
-# 如果相应分组没有筛选到对应的国家，请根据自己节点名字调整筛选关键字。
-# 没有再使用锚点，是考虑很多新手修改难度，这样新手修改某个分组更容易些。
+# 代理组
 proxy-groups:
-  - {name: 🚀 默认代理, type: select, proxies: [♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇹🇼 台湾节点, 🌐 全部节点, 直连]}
-  - {name: 📹 YouTube, type: select, proxies: [♻️ 美国自动, ♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇹🇼 台湾节点, 🌐 全部节点, 直连]}
-  - {name: 🍀 Google, type: select, proxies: [♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 自动选择, ♻️ 手动选择,  🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇹🇼 台湾节点, 🌐 全部节点, 直连]}
-  - {name: 🤖 AI, type: select, proxies: [♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇹🇼 台湾节点, 🌐 全部节点, 直连]}
-  - {name: 👨🏿‍💻 GitHub, type: select, proxies: [♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇹🇼 台湾节点, 🌐 全部节点, 直连]}
-  - {name: 🐬 OneDrive, type: select, proxies: [♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇹🇼 台湾节点, 🌐 全部节点, 直连]}
-  - {name: 🪟 Microsoft, type: select, proxies: [♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇹🇼 台湾节点, 🌐 全部节点, 直连]}
-  - {name: 🎵 TikTok, type: select, proxies: [♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇹🇼 台湾节点, 🌐 全部节点, 直连]}
-  - {name: 📲 Telegram, type: select, proxies: [♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇹🇼 台湾节点, 🌐 全部节点, 直连]}
-  - {name: 🎥 NETFLIX, type: select, proxies: [♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇹🇼 台湾节点, 🌐 全部节点, 直连]}
-  - {name: 💶 PayPal, type: select, proxies: [♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🇹🇼 台湾节点, 🌐 全部节点, 直连]}
-  - {name: 💢 广告拦截, type: select, proxies: ["DIRECT", "REJECT"]}
-  - {name: 🐟 漏网之鱼, type: select, proxies: [🚀 默认代理, ♻️ 香港自动, ♻️ 日本自动, ♻️ 狮城自动, ♻️ 美国自动, ♻️ 自动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, 直连]}
-  - {name: 🇭🇰 香港节点, type: select, include-all: true, filter: "(?i)港|hk|hongkong|hong kong"}
-  - {name: 🇯🇵 日本节点, type: select, include-all: true, filter: "(?i)日|jp|japan"}
-  - {name: 🇸🇬 狮城节点, type: select, include-all: true, filter: "(?i)新加坡|坡|狮城|SG|Singapore"}
-  - {name: 🇺🇲 美国节点, type: select, include-all: true, filter: "(?i)美|us|unitedstates|united states"}
-  - {name: 🇹🇼 台湾节点, type: select, include-all: true, filter: "(?i)台|tw|taiwan"}
-  - {name: ♻️ 香港自动, type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(港|HK|(?i)Hong))^((?!(台|日|韩|新|深|美)).)*$"}
-  - {name: ♻️ 日本自动, type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(日|JP|(?i)Japan))^((?!(港|台|韩|新|美)).)*$" }
-  - {name: ♻️ 狮城自动, type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(新加坡|坡|狮城|SG|Singapore))^((?!(港|台|韩|日|美)).)*$" }
-  - {name: ♻️ 美国自动, type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "(?=.*(美|US|(?i)States|America))^((?!(港|台|日|韩|新)).)*$"}
-  - {name: ♻️ 自动选择, type: url-test, include-all: true, tolerance: 20, interval: 300, filter: "^((?!(直连)).)*$"}
-  - {name: ♻️ 手动选择, type: select, include-all: true}
-  - {name: 🌐 全部节点, type: select, include-all: true}
+  - {name: 🚀 节点选择, type: select, proxies: [DIRECT, ♻️ 自动选择, 🚀 手动切换, 🇭🇰 Hong Kong, 🇯🇵 Japan, 🇺🇸 United States, 🇸🇬 Singapore, 🇹🇼 Taiwan, SubStore, 🌍 Other Regions]}
+  - {name: 🚀 手动切换, type: select, use: [all-proxies], proxies: [DIRECT]}
+  - {name: ♻️ 自动选择, type: url-test, url: http://www.gstatic.com/generate_204, interval: 300, tolerance: 50, use: [all-proxies]}
+  - {name: 🇭🇰 Hong Kong, type: select, use: [all-proxies], filter: "(?i)港|HK|Hong Kong"}
+  - {name: 🇯🇵 Japan, type: select, use: [all-proxies], filter: "(?i)日|JP|Japan"}
+  - {name: 🇺🇸 United States, type: select, use: [all-proxies], filter: "(?i)美|US|United States"}
+  - {name: 🇸🇬 Singapore, type: select, use: [all-proxies], filter: "(?i)新|SG|Singapore"}
+  - {name: 🇹🇼 Taiwan, type: select, use: [all-proxies], filter: "(?i)台|TW|Taiwan"}
+  - {name: SubStore, type: select, use: [all-proxies], filter: "^Sub"}
+  - {name: 🌍 Other Regions, type: select, use: [all-proxies], filter: "^(?!.*((?i)港|HK|Hong Kong|日|JP|Japan|美|US|United States|Balance|新|SG|Singapore|台|TW|Taiwan|^Sub)).*$"}
+  - {name: 🌐 国际流量, type: select, proxies: [🚀 节点选择, ♻️ 自动选择, 🚀 手动切换, 🇭🇰 Hong Kong, 🇯🇵 Japan, 🇺🇸 United States, 🇸🇬 Singapore, 🇹🇼 Taiwan, 🌍 Other Regions]}
+  - {name: 🎯 国内流量, type: select, proxies: [DIRECT, 🚀 节点选择]}
+  - {name: 🚫 国内广告, type: select, proxies: [REJECT, DIRECT, 🚀 节点选择]}
+  - {name: 🚫 国外广告, type: select, proxies: [REJECT, DIRECT, 🚀 节点选择]}
+  - {name: 🤖 AI服务, type: select, proxies: [🚀 节点选择, ♻️ 自动选择, 🚀 手动切换, 🇭🇰 Hong Kong, 🇯🇵 Japan, 🇺🇸 United States, 🇸🇬 Singapore, 🇹🇼 Taiwan, 🌍 Other Regions, SubStore]}
+  - {name: 📹 YouTube, type: select, proxies: [🚀 节点选择, ♻️ 自动选择, 🚀 手动切换, 🇭🇰 Hong Kong, 🇯🇵 Japan, 🇺🇸 United States, 🇸🇬 Singapore, 🇹🇼 Taiwan, 🌍 Other Regions, SubStore]}
+  - {name: Ⓜ️ 微软服务, type: select, proxies: [DIRECT, 🚀 节点选择, 🚀 手动切换, 🇭🇰 Hong Kong, 🇯🇵 Japan, 🇺🇸 United States, 🇸🇬 Singapore, 🇹🇼 Taiwan, 🌍 Other Regions]}
+  - {name: 🔍 谷歌服务, type: select, proxies: [🚀 节点选择, ♻️ 自动选择, 🚀 手动切换, 🇭🇰 Hong Kong, 🇯🇵 Japan, 🇺🇸 United States, 🇸🇬 Singapore, 🇹🇼 Taiwan, 🌍 Other Regions]}
+  - {name: 📧 Google FCM, type: select, proxies: [🚀 节点选择, ♻️ 自动选择, 🚀 手动切换, 🇭🇰 Hong Kong, 🇯🇵 Japan, 🇺🇸 United States, 🇸🇬 Singapore, 🇹🇼 Taiwan, 🌍 Other Regions]}
+  - {name: 🍎 Apple服务, type: select, proxies: [DIRECT, 🚀 节点选择, 🚀 手动切换, 🇭🇰 Hong Kong, 🇯🇵 Japan, 🇺🇸 United States, 🇸🇬 Singapore, 🇹🇼 Taiwan, 🌍 Other Regions, SubStore]}
+  - {name: 🌍 国外媒体, type: select, use: [all-proxies], proxies: [🚀 节点选择, ♻️ 自动选择, 🚀 手动切换, 🇭🇰 Hong Kong, 🇯🇵 Japan, 🇺🇸 United States, 🇸🇬 Singapore, 🇹🇼 Taiwan, 🌍 Other Regions, SubStore]}
+  - {name: ✈️ Telegram, type: select, proxies: [🚀 节点选择, ♻️ 自动选择, 🚀 手动切换, 🇭🇰 Hong Kong, 🇯🇵 Japan, 🇺🇸 United States, 🇸🇬 Singapore, 🇹🇼 Taiwan, 🌍 Other Regions, SubStore]}
+  - {name: Ⓜ️ Microsoft, type: select, proxies: [DIRECT, 🚀 节点选择, ♻️ 自动选择, 🚀 手动切换, 🇭🇰 Hong Kong, 🇯🇵 Japan, 🇺🇸 United States, 🇸🇬 Singapore, 🇹🇼 Taiwan, 🌍 Other Regions]}
+  - {name: 🫧 WeChat, type: select, proxies: [DIRECT, 🚀 节点选择, 🚀 手动切换]}
 
 # 规则匹配
-# 此规则部分没有做防泄露处理，因为弊严重大于利！
 rules:
-  - RULE-SET,private_ip,直连,no-resolve
-  - RULE-SET,private_domain,直连
-  - DOMAIN-SUFFIX,qichiyu.com,🚀 默认代理
-  - RULE-SET,proxylite,🚀 默认代理
-  - RULE-SET,ai,🤖 AI
-  - RULE-SET,github_domain,👨🏿‍💻 GitHub
-  - RULE-SET,youtube_domain,📹 YouTube
-  - RULE-SET,google_domain,🍀 Google
-  - RULE-SET,onedrive_domain,🐬 OneDrive
-  - RULE-SET,microsoft_domain,🪟 Microsoft
-  - RULE-SET,apple_domain,直连
-  - RULE-SET,tiktok_domain,🎵 TikTok
-  - RULE-SET,telegram_domain,📲 Telegram
-  - RULE-SET,netflix_domain,🎥 NETFLIX
-  - RULE-SET,paypal_domain,💶 PayPal
-  - RULE-SET,apple_ip,直连,no-resolve
-  - RULE-SET,google_ip,🍀 Google,no-resolve
-  - RULE-SET,netflix_ip,🎥 NETFLIX,no-resolve
-  - RULE-SET,telegram_ip,📲 Telegram,no-resolve
-  - RULE-SET,geolocation-!cn,🚀 默认代理
-  - RULE-SET,cn_domain,直连
-  - RULE-SET,cn_ip,直连
-  - RULE-SET,ad,💢 广告拦截
-  - MATCH,🐟 漏网之鱼
+  - DOMAIN-SUFFIX,heiyu.space,DIRECT
+  - DOMAIN-SUFFIX,lazycat.cloud,DIRECT
+  - RULE-SET,AdBlock,🚫 国外广告
+  - RULE-SET,HTTPDNS,🚫 国外广告
+  - RULE-SET,Special,DIRECT
+  - RULE-SET,AI Suite,🤖 AI服务
+  - RULE-SET,Netflix,🌍 国外媒体
+  - RULE-SET,Disney Plus,🌍 国外媒体
+  - RULE-SET,YouTube,📹 YouTube
+  - RULE-SET,Max,🌍 国外媒体
+  - RULE-SET,Spotify,🌍 国外媒体
+  - RULE-SET,Bilibili,🎯 国内流量
+  - RULE-SET,IQ,🎯 国内流量
+  - RULE-SET,IQIYI,🎯 国内流量
+  - RULE-SET,Letv,🎯 国内流量
+  - RULE-SET,Netease Music,🎯 国内流量
+  - RULE-SET,Tencent Video,🎯 国内流量
+  - RULE-SET,WeTV,🎯 国内流量
+  - RULE-SET,Youku,🎯 国内流量
+  - RULE-SET,Abema TV,🌍 国外媒体
+  - RULE-SET,Bahamut,🌍 国外媒体
+  - RULE-SET,DMM,🌍 国外媒体
+  - RULE-SET,Fox+,🌍 国外媒体
+  - RULE-SET,Hulu Japan,🌍 国外媒体
+  - RULE-SET,Japonx,🌍 国外媒体
+  - RULE-SET,JOOX,🌍 国外媒体
+  - RULE-SET,KKBOX,🌍 国外媒体
+  - RULE-SET,KKTV,🌍 国外媒体
+  - RULE-SET,Line TV,🌍 国外媒体
+  - RULE-SET,myTV SUPER,🌍 国外媒体
+  - RULE-SET,Niconico,🌍 国外媒体
+  - RULE-SET,ViuTV,🌍 国外媒体
+  - RULE-SET,ABC,🌍 国外媒体
+  - RULE-SET,Amazon,🌍 国外媒体
+  - RULE-SET,BBC iPlayer,🌍 国外媒体
+  - RULE-SET,DAZN,🌍 国外媒体
+  - RULE-SET,Discovery Plus,🌍 国外媒体
+  - RULE-SET,encoreTVB,🌍 国外媒体
+  - RULE-SET,F1 TV,🌍 国外媒体
+  - RULE-SET,Fox Now,🌍 国外媒体
+  - RULE-SET,Hulu,🌍 国外媒体
+  - RULE-SET,Pandora,🌍 国外媒体
+  - RULE-SET,PBS,🌍 国外媒体
+  - RULE-SET,Pornhub,🌍 国外媒体
+  - RULE-SET,Soundcloud,🌍 国外媒体
+  - RULE-SET,Telegram,✈️ Telegram
+  - RULE-SET,Crypto,🌐 国际流量
+  - RULE-SET,Discord,🌐 国际流量
+  - RULE-SET,Google FCM,📧 Google FCM
+  - RULE-SET,Google,🔍 谷歌服务
+  - RULE-SET,Google Drive,🔍 谷歌服务
+  - RULE-SET,YouTube Music,📹 YouTube
+  - RULE-SET,Google Search,🔍 谷歌服务
+  - RULE-SET,Microsoft,Ⓜ️ Microsoft
+  - RULE-SET,PayPal,🌐 国际流量
+  - RULE-SET,Scholar,🔍 谷歌服务
+  - RULE-SET,Speedtest,🌐 国际流量
+  - RULE-SET,Steam,🌐 国际流量
+  - RULE-SET,TikTok,🌐 国际流量
+  - RULE-SET,Apple Music,🍎 Apple服务
+  - RULE-SET,Apple News,🍎 Apple服务
+  - RULE-SET,Apple TV,🍎 Apple服务
+  - RULE-SET,Apple,🍎 Apple服务
+  - RULE-SET,miHoYo,🎯 国内流量
+  - RULE-SET,PROXY,🌐 国际流量
+  - RULE-SET,Domestic,🎯 国内流量
+  - RULE-SET,Domestic IPs,🎯 国内流量
+  - RULE-SET,LAN,DIRECT
+  - GEOIP,CN,🎯 国内流量
+  - MATCH,🌐 国际流量
 
-# 规则集
-## type：可选http/file/inline  behavior：可选domain/ipcidr/classical format：可选yaml/text/mrs
-rule-anchor:
-  ip: &ip {type: http, interval: 86400, behavior: ipcidr, format: mrs}
-  domain: &domain {type: http, interval: 86400, behavior: domain, format: mrs}
-  class: &class {type: http, interval: 86400, behavior: classical, format: text}
+# 规则提供者
 rule-providers:
-  private_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/private.mrs"}
-  proxylite: { <<: *class, url: "https://raw.githubusercontent.com/qichiyuhub/rule/refs/heads/main/proxy.list"}
-  ai: {  <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs" }
-  youtube_domain: { <<: *class, url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/YouTube/YouTube.list"}
-  google_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/google.mrs"}
-  github_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/github.mrs"}
-  telegram_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs"}
-  netflix_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/netflix.mrs"}
-  paypal_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/paypal.mrs"}
-  onedrive_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/onedrive.mrs"}
-  microsoft_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/microsoft.mrs"}
-  apple_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/apple.mrs"}
-  speedtest_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/ookla-speedtest.mrs"}
-  tiktok_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/tiktok.mrs"}
-  geolocation-!cn: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/geolocation-!cn.mrs"}
-  cn_domain: { <<: *domain, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cn.mrs"}
-  private_ip: {<<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/private.mrs"}
-  cn_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/cn.mrs"}
-  google_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/google.mrs"}
-  telegram_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/telegram.mrs"}
-  netflix_ip: { <<: *ip, url: "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/netflix.mrs"}
-  apple_ip: {<<: *class, url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Apple/Apple.list"}
-  ad: { <<: *class, url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Advertising/Advertising.list"}
+  AdBlock: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/AdBlock.yaml", path: ./Rules/AdBlock, interval: 604800}
+  HTTPDNS: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/HTTPDNS.yaml", path: ./Rules/HTTPDNS, interval: 604800}
+  Special: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Special.yaml", path: ./Rules/Special, interval: 604800}
+  PROXY: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Proxy.yaml", path: ./Rules/Proxy, interval: 604800}
+  Domestic: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Domestic.yaml", path: ./Rules/Domestic, interval: 604800}
+  Domestic IPs: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Domestic%20IPs.yaml", path: ./Rules/Domestic_IPs, interval: 604800}
+  LAN: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/LAN.yaml", path: ./Rules/LAN, interval: 604800}
+  Netflix: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Netflix.yaml", path: ./Rules/Media/Netflix, interval: 604800}
+  Spotify: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Spotify.yaml", path: ./Rules/Media/Spotify, interval: 604800}
+  YouTube: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/YouTube.yaml", path: ./Rules/Media/YouTube, interval: 604800}
+  Max: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Max.yaml", path: ./Rules/Media/Max, interval: 604800}
+  Bilibili: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Bilibili.yaml", path: ./Rules/Media/Bilibili, interval: 604800}
+  IQ: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/IQ.yaml", path: ./Rules/Media/IQI, interval: 604800}
+  IQIYI: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/IQIYI.yaml", path: ./Rules/Media/IQYI, interval: 604800}
+  Letv: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Letv.yaml", path: ./Rules/Media/Letv, interval: 604800}
+  Netease Music: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Netease%20Music.yaml", path: ./Rules/Media/Netease_Music, interval: 604800}
+  Tencent Video: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Tencent%20Video.yaml", path: ./Rules/Media/Tencent_Video, interval: 604800}
+  Youku: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Youku.yaml", path: ./Rules/Media/Youku, interval: 604800}
+  WeTV: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/WeTV.yaml", path: ./Rules/Media/WeTV, interval: 604800}
+  ABC: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/ABC.yaml", path: ./Rules/Media/ABC, interval: 604800}
+  Abema TV: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Abema%20TV.yaml", path: ./Rules/Media/Abema_TV, interval: 604800}
+  Amazon: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Amazon.yaml", path: ./Rules/Media/Amazon, interval: 604800}
+  Apple Music: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Apple%20Music.yaml", path: ./Rules/Media/Apple_Music, interval: 604800}
+  Apple News: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Apple%20News.yaml", path: ./Rules/Media/Apple_News, interval: 604800}
+  Apple TV: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Apple%20TV.yaml", path: ./Rules/Media/Apple_TV, interval: 604800}
+  Bahamut: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Bahamut.yaml", path: ./Rules/Media/Bahamut, interval: 604800}
+  BBC iPlayer: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/BBC%20iPlayer.yaml", path: ./Rules/Media/BBC_iPlayer, interval: 604800}
+  DAZN: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/DAZN.yaml", path: ./Rules/Media/DAZN, interval: 604800}
+  Discovery Plus: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Discovery%20Plus.yaml", path: ./Rules/Media/Discovery_Plus, interval: 604800}
+  Disney Plus: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Disney%20Plus.yaml", path: ./Rules/Media/Disney_Plus, interval: 604800}
+  DMM: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/DMM.yaml", path: ./Rules/Media/DMM, interval: 604800}
+  encoreTVB: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/encoreTVB.yaml", path: ./Rules/Media/encoreTVB, interval: 604800}
+  F1 TV: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/F1%20TV.yaml", path: ./Rules/Media/F1_TV, interval: 604800}
+  Fox Now: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Fox%20Now.yaml", path: ./Rules/Media/Fox_Now, interval: 604800}
+  Fox+: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Fox%2B.yaml", path: "./Rules/Media/Fox+", interval: 604800}
+  Hulu Japan: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Hulu%20Japan.yaml", path: ./Rules/Media/Hulu_Japan, interval: 604800}
+  Hulu: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Hulu.yaml", path: ./Rules/Media/Hulu, interval: 604800}
+  Japonx: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Japonx.yaml", path: ./Rules/Media/Japonx, interval: 604800}
+  JOOX: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/JOOX.yaml", path: ./Rules/Media/JOOX, interval: 604800}
+  KKBOX: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/KKBOX.yaml", path: ./Rules/Media/KKBOX, interval: 604800}
+  KKTV: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/KKTV.yaml", path: ./Rules/Media/KKTV, interval: 604800}
+  Line TV: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Line%20TV.yaml", path: ./Rules/Media/Line_TV, interval: 604800}
+  myTV SUPER: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/myTV%20SUPER.yaml", path: ./Rules/Media/myTV_SUPER, interval: 604800}
+  Niconico: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Niconico.yaml", path: ./Rules/Media/Niconico, interval: 604800}
+  Pandora: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Pandora.yaml", path: ./Rules/Media/Pandora, interval: 604800}
+  PBS: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/PBS.yaml", path: ./Rules/Media/PBS, interval: 604800}
+  Pornhub: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Pornhub.yaml", path: ./Rules/Media/Pornhub, interval: 604800}
+  Soundcloud: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/Soundcloud.yaml", path: ./Rules/Media/Soundcloud, interval: 604800}
+  ViuTV: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Media/ViuTV.yaml", path: ./Rules/Media/ViuTV, interval: 604800}
+  Telegram: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Telegram.yaml", path: ./Rules/Telegram, interval: 604800}
+  Crypto: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Crypto.yaml", path: ./Rules/Crypto, interval: 604800}
+  Discord: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Discord.yaml", path: ./Rules/Discord, interval: 604800}
+  Steam: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Steam.yaml", path: ./Rules/Steam, interval: 604800}
+  TikTok: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/TikTok.yaml", path: ./Rules/TikTok, interval: 604800}
+  Speedtest: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Speedtest.yaml", path: ./Rules/Speedtest, interval: 604800}
+  PayPal: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/PayPal.yaml", path: ./Rules/PayPal, interval: 604800}
+  Microsoft: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Microsoft.yaml", path: ./Rules/Microsoft, interval: 604800}
+  AI Suite: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/AI%20Suite.yaml", path: "./Rules/AI Suite", interval: 604800}
+  Apple: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Apple.yaml", path: ./Rules/Apple, interval: 604800}
+  Google FCM: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Google%20FCM.yaml", path: "./Rules/Google FCM", interval: 604800}
+  Google: {type: http, behavior: classical, url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Google/Google.yaml", path: ./Rules/Google, interval: 604800}
+  Google Drive: {type: http, behavior: classical, url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GoogleDrive/GoogleDrive.yaml", path: ./Rules/GoogleDrive, interval: 604800}
+  YouTube Music: {type: http, behavior: classical, url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/YouTubeMusic/YouTubeMusic.yaml", path: ./Rules/YouTubeMusic, interval: 604800}
+  Google Search: {type: http, behavior: classical, url: "https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GoogleSearch/GoogleSearch.yaml", path: ./Rules/GoogleSearch, interval: 604800}
+  Scholar: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/Scholar.yaml", path: ./Rules/Scholar, interval: 604800}
+  miHoYo: {type: http, behavior: classical, url: "https://testingcf.jsdelivr.net/gh/dler-io/Rules@main/Clash/Provider/miHoYo.yaml", path: ./Rules/miHoYo, interval: 604800}
