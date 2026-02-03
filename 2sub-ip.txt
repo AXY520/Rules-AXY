@@ -7,3 +7,4 @@ time.is:2083#官方优选-1
 icook.hk:2083#官方优选-2
 icook.tw:2083#官方优选-3
 123.cf.090227.xyz:2083#CM优选域名
+www.csgo.com#CS
