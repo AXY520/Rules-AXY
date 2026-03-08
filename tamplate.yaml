@@ -20,19 +20,41 @@ global-client-fingerprint: chrome
 ### DNS配置
 dns:
   enable: true
-  default-nameserver:      #基础DNS服务器,必须先有它才能使用域名类型的DNS配置,因此必须为IP,此处使用阿里云DNS
-    - tls://223.5.5.5
-    - tls://223.6.6.6
-  nameserver:         #在访问的国外网站没有匹配到任何域名规则,最终走了MATCH兜底规则时使用的DNS,为了确保不发生DNS泄漏和DNS污染,必须使用国外DNS
-    - https://cloudflare-dns.com/dns-query
-    - https://dns.google/dns-query
-  proxy-server-nameserver:         #解析代理节点时使用的DNS,为了使下面的respect-rules生效必须设置,最好设置为国内DNS,否则在代理的第一步就可能因为连接不上国外DNS而解析不出代理节点的IP,最终倒在起点
-    - https://dns.alidns.com/dns-query
-    - https://doh.pub/dns-query
-  direct-nameserver:           #规则匹配到直连时使用的DNS,既然是可以直连的,当然要用国内DNS
-    - https://dns.alidns.com/dns-query
-    - https://doh.pub/dns-query
-  respect-rules: true      #让连接DNS服务器时能够遵循规则,也就是通过代理节点连接到上面设置的国外DNS,因为直连可能连接不上
+  ipv6: false
+  prefer-h3: true
+  use-hosts: true
+  use-system-hosts: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - rule-set:fakeip-filter
+    - +.lan
+    - +.local
+    - localhost.ptlogin2.qq.com
+    - localhost.sec.qq.com
+    - time.*.com
+    - ntp.*.com
+    - +.market.xiaomi.com
+    - '*.heiyu.space'
+    - '*.lazycat.cloud'
+  default-nameserver:      # 基础 DNS，仅用于解析 DNS 服务器自身域名
+    - 223.5.5.5
+    - 223.6.6.6
+  nameserver:         # 默认远端 DNS，未命中直连策略时优先使用
+    - https://cloudflare-dns.com/dns-query#h3=true
+    - https://dns.google/dns-query#h3=true
+  proxy-server-nameserver:         # 解析代理节点时使用，优先保证节点域名可解析
+    - https://dns.alidns.com/dns-query#h3=true
+    - https://doh.pub/dns-query#h3=true
+  direct-nameserver:           # 规则命中直连时使用国内 DNS
+    - https://dns.alidns.com/dns-query#h3=true
+    - https://doh.pub/dns-query#h3=true
+  direct-nameserver-follow-policy: true
+  nameserver-policy:
+    'geosite:cn,private':
+      - https://dns.alidns.com/dns-query#h3=true
+      - https://doh.pub/dns-query#h3=true
+  respect-rules: true      # 让 DNS 请求也遵循规则，减少污染与泄漏
   always-real-ip:
     - "*.heiyu.space"
     - "*.lazycat.cloud"
@@ -53,18 +75,21 @@ sniffer:
   skip-domain:
     - "+.baidu。com"
 
-# 入站  
+# 入站
 tun:
   enable: true
   # system/gvisor/mixed
   stack: mixed
   dns-hijack: ["any:53", "tcp://any:53"]
-  #使用nikki,混入全部不修改的情况,开启接口指定为nikki
-  #使用仅内核自行修改下面三项为true
-  #device: nikki
+  # 使用 nikki 时可指定 device: nikki
+  # 若改为纯内核接管，可将下面三项切换为 true
+  # device: nikki
   auto-route: false
   auto-redirect: false
   auto-detect-interface: false
+  # auto-route: true
+  # auto-redirect: true
+  # auto-detect-interface: true
   route-exclude-address:
     - 6.6.6.6/32
     - 2000::6666/128
@@ -81,43 +106,52 @@ FilterSub: &FilterSub '^Sub.*'
 FilterCF: &FilterSub '^CF.*'
 FilterAll: &FilterAll '^(?=.*(.))(?!.*((?i)群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|(\b(USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author)\b|(\d{4}-\d{2}-\d{2}|\d+G)))).*$'
 
-Select: &Select {type: select, url: 'https://www.apple.com/library/test/success.html', disable-udp: false, hidden: false, include-all: true}
-Auto: &Auto {type: url-test, url: 'https://www.apple.com/library/test/success.html', interval: 300, tolerance: 20, disable-udp: false, hidden: true, include-all: true}
-Loadbalance: &Loadbalance {type: load-balance, url: 'https://www.apple.com/library/test/success.html', interval: 300, strategy: round-robin, disable-udp: false, hidden: true, include-all: true}
+TestUrl: &TestUrl 'https://cp.cloudflare.com/generate_204'
+Select: &Select {type: select, url: *TestUrl, disable-udp: false, hidden: false, include-all: true}
+Auto: &Auto {type: url-test, url: *TestUrl, interval: 300, tolerance: 50, lazy: true, disable-udp: false, hidden: true, include-all: true}
+Fallback: &Fallback {type: fallback, url: *TestUrl, interval: 300, lazy: true, disable-udp: false, hidden: true, include-all: true}
+Loadbalance: &Loadbalance {type: load-balance, url: *TestUrl, interval: 300, strategy: round-robin, disable-udp: false, hidden: true, include-all: true}
+
+ProxyDefault: &ProxyDefault [🚀 默认代理, 🧭 节点选择, 🛟 故障转移, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT]
+ProxyStreaming: &ProxyStreaming [🚀 默认代理, 🛟 故障转移, 🇺🇸 美国自动, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, ♻️ 自动选择, ♻️ 手动选择, 🌐 全部节点, DIRECT]
+ProxyGoogle: &ProxyGoogle [🚀 默认代理, 🛟 故障转移, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT]
+ProxyAI: &ProxyAI [🚀 默认代理, 🛟 故障转移, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT]
+ProxyNodeSelect: &ProxyNodeSelect [🛟 故障转移, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT]
 
 # 策略组
 proxy-groups:
   # 主选择组
-  - {name: 🚀 默认代理, type: select, proxies: [🧭 节点选择, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT], url: https://www.apple.com/library/test/success.html}
+  - {name: 🚀 默认代理, type: select, proxies: *ProxyDefault, url: *TestUrl}
 
   # 应用分组
-  - {name: 📹 YouTube, type: select, proxies: [🚀 默认代理, 🇺🇸 美国自动, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, ♻️ 自动选择, ♻️ 手动选择, 🌐 全部节点, DIRECT], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Streaming.png}
-  - {name: 🍀 Google, type: select, proxies: [🚀 默认代理, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Google.png}
-  - {name: 🤖 AI, type: select, proxies: [🚀 默认代理, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/OpenAI.png}
-  - {name: 👨🏿‍💻 GitHub, type: select, proxies: [🚀 默认代理, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Github.png}
-  - {name: 🪟 Microsoft, type: select, proxies: [🚀 默认代理, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Microsoft.png}
-  - {name: 🐬 OneDrive, type: select, proxies: [🚀 默认代理, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Onedrive.png}
-  - {name: 📲 Telegram, type: select, proxies: [🚀 默认代理, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🌐 全部节点, DIRECT], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Telegram.png}
+  - {name: 📹 YouTube, type: select, proxies: *ProxyStreaming, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Streaming.png}
+  - {name: 🍀 Google, type: select, proxies: *ProxyGoogle, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Google.png}
+  - {name: 🤖 AI, type: select, proxies: *ProxyAI, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/OpenAI.png}
+  - {name: 👨🏿‍💻 GitHub, type: select, proxies: *ProxyGoogle, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Github.png}
+  - {name: 🪟 Microsoft, type: select, proxies: *ProxyGoogle, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Microsoft.png}
+  - {name: 🐬 OneDrive, type: select, proxies: *ProxyGoogle, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Onedrive.png}
+  - {name: 📲 Telegram, type: select, proxies: *ProxyStreaming, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Telegram.png}
   - {name: 💢 广告拦截, type: select, proxies: [DIRECT, REJECT]}
-  - {name: 🐟 漏网之鱼, type: select, proxies: [🚀 默认代理, 🧭 节点选择, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT]}
+  - {name: 🐟 漏网之鱼, type: select, proxies: *ProxyDefault}
 
-  # 自动选择 - 按地区
-  - {name: 🧭 节点选择, type: select, proxies: [🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT], icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Proxy.png}
+  # 节点选择与自动组
+  - {name: 🧭 节点选择, type: select, proxies: *ProxyNodeSelect, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Proxy.png}
+  - {name: 🛟 故障转移, <<: *Fallback, filter: *FilterAll, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Available.png}
   - {name: 🇭🇰 香港自动, <<: *Auto, filter: *FilterHK, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/HK.png}
   - {name: 🇯🇵 日本自动, <<: *Auto, filter: *FilterJP, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/JP.png}
   - {name: 🇸🇬 狮城自动, <<: *Auto, filter: *FilterSG, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/SG.png}
   - {name: 🇺🇸 美国自动, <<: *Auto, filter: *FilterUS, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/US.png}
 
   # 手动选择节点
-  - {name: ♻️ 自动选择, <<: *Auto, filter: *FilterAll}
-  - {name: ♻️ 手动选择, <<: *Select, filter: *FilterAll}
-  - {name: 🌐 全部节点, <<: *Select}
+  - {name: ♻️ 自动选择, <<: *Auto, filter: *FilterAll, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Auto.png}
+  - {name: ♻️ 手动选择, <<: *Select, filter: *FilterAll, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Select.png}
+  - {name: 🌐 全部节点, <<: *Select, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Global.png}
 
   # 手动选择地区节点
-  - {name: 🇭🇰 香港节点, <<: *Select, filter: *FilterHK}
-  - {name: 🇯🇵 日本节点, <<: *Select, filter: *FilterJP}
-  - {name: 🇸🇬 狮城节点, <<: *Select, filter: *FilterSG}
-  - {name: 🇺🇲 美国节点, <<: *Select, filter: *FilterUS}
+  - {name: 🇭🇰 香港节点, <<: *Select, filter: *FilterHK, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/HK.png}
+  - {name: 🇯🇵 日本节点, <<: *Select, filter: *FilterJP, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/JP.png}
+  - {name: 🇸🇬 狮城节点, <<: *Select, filter: *FilterSG, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/SG.png}
+  - {name: 🇺🇲 美国节点, <<: *Select, filter: *FilterUS, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/US.png}
 
 ### 规则配置
 RuleSet_classical: &RuleSet_classical {type: http, behavior: classical, interval: 43200, format: text, proxy: 🚀 默认代理}
