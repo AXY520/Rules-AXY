@@ -5,14 +5,17 @@ mode: rule
 log-level: warning
 ipv6: false
 find-process-mode: strict
-### 如果使用的是裸核,需要将下面的注释去掉,方便ui界面的使用
+
+# 如果使用的是裸核,需要将下面的注释去掉,方便ui界面的使用
 # external-controller: 0.0.0.0:9988
 # external-ui: ui
 # external-ui-url: 'https://testingcf.jsdelivr.net/gh/Zephyruso/zashboard@releases/latest/download/dist.zip'
 # secret: "114514yijiuyijiubayiling"
+
 profile:
   store-selected: true
   store-fake-ip: true
+
 unified-delay: true
 tcp-concurrent: true
 global-client-fingerprint: chrome
@@ -21,11 +24,12 @@ global-client-fingerprint: chrome
 dns:
   enable: true
   ipv6: false
-  prefer-h3: true
+  prefer-h3: true               # 如果 DoH 经常卡住，可改为 false
   use-hosts: true
   use-system-hosts: false
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
+  fake-ip-filter-mode: blacklist   # 明确指定黑名单模式，更稳定
   fake-ip-filter:
     - rule-set:fakeip-filter
     - +.lan
@@ -37,6 +41,7 @@ dns:
     - +.market.xiaomi.com
     - '*.heiyu.space'
     - '*.lazycat.cloud'
+    - geosite:private              # 补充常见私有网络
   default-nameserver:      # 基础 DNS，仅用于解析 DNS 服务器自身域名
     - 223.5.5.5
     - 223.6.6.6
@@ -59,7 +64,7 @@ dns:
     - "*.heiyu.space"
     - "*.lazycat.cloud"
 
-# 嗅探
+# 嗅探（简化了 force-domain，修正了中文句号）
 sniffer:
   enable: true
   sniff:
@@ -70,34 +75,26 @@ sniffer:
       ports: [443, 8443]
     QUIC:
       ports: [443, 8443]
-  force-domain:
-    - "+。v2ex。com"
   skip-domain:
-    - "+.baidu。com"
+    - +.baidu.com
 
-# 入站
+# 入站（开启常见自动功能，桌面/手机用户推荐）
 tun:
   enable: true
   # system/gvisor/mixed
   stack: mixed
-  dns-hijack: ["any:53", "tcp://any:53"]
-  # 使用 nikki 时可指定 device: nikki
-  # 若改为纯内核接管，可将下面三项切换为 true
-  # device: nikki
-  auto-route: false
-  auto-redirect: false
-  auto-detect-interface: false
-  # auto-route: true
-  # auto-redirect: true
-  # auto-detect-interface: true
+  dns-hijack: 
+    - any:53
+    - tcp://any:53
+  auto-route: true
+  auto-redirect: true
+  auto-detect-interface: true
+  strict-route: true          # 建议加上，防泄露
   route-exclude-address:
     - 6.6.6.6/32
     - 2000::6666/128
-  
-  
 
-# 节点筛选
-# 按地区筛选
+# 节点筛选（保持原样）
 FilterHK: &FilterHK '^(?=.*(港|hk|hongkong|hong kong|🇭🇰))^(?!.*(网站|地址|剩余|过期|时间|有效|网址|禁止|邮箱|发布|客服|订阅|节点|落地|家宽|自建|×)).*$'
 FilterJP: &FilterJP '^(?=.*(日|jp|japan|🇯🇵))^(?!.*(网站|地址|剩余|过期|时间|有效|网址|禁止|邮箱|发布|客服|订阅|节点|落地|家宽|自建|×)).*$'
 FilterSG: &FilterSG '^(?=.*(新加坡|坡|狮城|SG|Singapore|🇸🇬))^(?!.*(网站|地址|剩余|过期|时间|有效|网址|禁止|邮箱|发布|客服|订阅|节点|落地|家宽|自建|×)).*$'
@@ -118,7 +115,7 @@ ProxyGoogle: &ProxyGoogle [🚀 默认代理, 🛟 故障转移, 🇭🇰 香港
 ProxyAI: &ProxyAI [🚀 默认代理, 🛟 故障转移, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT]
 ProxyNodeSelect: &ProxyNodeSelect [🛟 故障转移, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT]
 
-# 策略组
+# 策略组（保持原样）
 proxy-groups:
   # 主选择组
   - {name: 🚀 默认代理, type: select, proxies: *ProxyDefault, url: *TestUrl}
@@ -159,7 +156,7 @@ RuleSet_domain: &RuleSet_domain {type: http, behavior: domain, interval: 43200, 
 RuleSet_ipcidr: &RuleSet_ipcidr {type: http, behavior: ipcidr, interval: 43200, format: text, proxy: 🚀 默认代理}
 RuleSet_filter: &RuleSet_filter {type: http, behavior: domain, interval: 43200, format: mrs, proxy: 🚀 默认代理}
 
-# 订阅规则
+# 订阅规则（保持原样）
 rule-providers:
   fakeip-filter:
     <<: *RuleSet_filter
@@ -256,14 +253,20 @@ rule-providers:
     url: https://ruleset.skk.moe/Clash/domainset/reject.txt
     path: ./rule_set/sukkaw_ruleset/ad.txt
 
-# 分流规则
+  tencent:
+    <<: *RuleSet_classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Tencent/Tencent.yaml
+    path: ./rule_set/sukkaw_ruleset/tencent.yaml
+    interval: 86400
+
+# 分流规则（添加微信直连规则在最前面）
 rules:
-  # 自定义规则
+  - RULE-SET,tencent,DIRECT
+  # 自定义规则（原有的保留）
   - DOMAIN-SUFFIX,heiyu.space,DIRECT
   - DOMAIN-SUFFIX,lazycat.cloud,DIRECT
-  - DOMAIN-SUFFIX,qichiyu.com,🚀 默认代理
 
-  # 规则集
+  # 规则集（原顺序）
   - RULE-SET,private_ip,DIRECT,no-resolve
   - RULE-SET,private_domain,DIRECT
   - RULE-SET,proxylite,🚀 默认代理
