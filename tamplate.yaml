@@ -109,7 +109,7 @@ Auto: &Auto {type: url-test, url: *TestUrl, interval: 300, tolerance: 50, lazy: 
 Fallback: &Fallback {type: fallback, url: *TestUrl, interval: 300, lazy: true, disable-udp: false, hidden: true, include-all: true}
 Loadbalance: &Loadbalance {type: load-balance, url: *TestUrl, interval: 300, strategy: round-robin, disable-udp: false, hidden: true, include-all: true}
 
-ProxyDefault: &ProxyDefault [🚀 默认代理, 🧭 节点选择, 🛟 故障转移, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT]
+ProxyDefault: &ProxyDefault [🧭 节点选择, 🛟 故障转移, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT]
 ProxyStreaming: &ProxyStreaming [🚀 默认代理, 🛟 故障转移, 🇺🇸 美国自动, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, ♻️ 自动选择, ♻️ 手动选择, 🌐 全部节点, DIRECT]
 ProxyGoogle: &ProxyGoogle [🚀 默认代理, 🛟 故障转移, 🇭🇰 香港自动, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇭🇰 香港节点, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT]
 ProxyAI: &ProxyAI [🚀 默认代理, 🛟 故障转移, 🇯🇵 日本自动, 🇸🇬 狮城自动, 🇺🇸 美国自动, ♻️ 自动选择, ♻️ 手动选择, 🇯🇵 日本节点, 🇸🇬 狮城节点, 🇺🇲 美国节点, 🌐 全部节点, DIRECT]
