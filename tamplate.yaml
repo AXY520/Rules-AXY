@@ -219,8 +219,8 @@ rule-providers:
 
   google_domain:
     <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/domainset/google.txt
-    path: ./rule_set/sukkaw_ruleset/google_domain.txt
+    url: https://rule.kelee.one/Clash/Google.yaml
+    path: ./rule_set/sukkaw_ruleset/Google.yaml
 
   onedrive_domain:
     <<: *RuleSet_domain
