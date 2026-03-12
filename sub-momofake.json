@@ -21,7 +21,7 @@
     "reverse_mapping": true
   },
   "outbounds": [
-    {"tag": "🚀 默认代理", "type": "selector", "outbounds": ["🇭🇰 香港自动", "🇯🇵 日本自动", "🇸🇬 狮城自动", "🇺🇲 美国自动", "🛠 日常使用", "📺 流媒体组", "🐸 手动选择", "♻️ 自动选择"]},
+    {"tag": "🚀 默认代理", "type": "selector", "outbounds": ["🇭🇰 香港自动", "🇯🇵 日本自动", "🇸🇬 狮城自动", "🇺🇲 美国自动", "📺 流媒体组", "🐸 手动选择", "♻️ 自动选择"]},
     {"tag": "🧠 AI", "type": "selector", "outbounds": ["🚀 默认代理", "🇯🇵 日本自动", "🇸🇬 狮城自动", "🇺🇲 美国自动"]},
     {"tag": "📹 YouTube", "type": "selector", "outbounds": ["🚀 默认代理", "📺 流媒体组", "🇭🇰 香港自动", "🇯🇵 日本自动", "🇸🇬 狮城自动", "🇺🇲 美国自动", "🐸 手动选择"]},
     {"tag": "🍀 Google", "type": "selector", "outbounds": ["🚀 默认代理", "🇭🇰 香港自动", "🇯🇵 日本自动", "🇸🇬 狮城自动", "🇺🇲 美国自动", "🐸 手动选择"]},
@@ -36,7 +36,6 @@
     {"tag": "🍏 Apple", "type": "selector", "outbounds": ["🎯 全球直连", "🇭🇰 香港自动", "🇯🇵 日本自动", "🇸🇬 狮城自动", "🇺🇲 美国自动"]},
     {"tag": "🐠 漏网之鱼", "type": "selector", "outbounds": ["🚀 默认代理", "🎯 全球直连"]},
     {"tag": "📺 流媒体组", "type": "urltest", "outbounds": []},
-    {"tag": "🛠 日常使用", "type": "urltest", "outbounds": []},
     {"tag": "🇭🇰 香港自动", "type": "urltest", "outbounds": []},
     {"tag": "🇯🇵 日本自动", "type": "urltest", "outbounds": []},
     {"tag": "🇸🇬 狮城自动", "type": "urltest", "outbounds": []},
