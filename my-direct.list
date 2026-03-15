@@ -1,8 +1,0 @@
-# 自定义直连域名列表
-# DOMAIN-SUFFIX,example.com - 匹配 *.example.com 和 example.com
-# DOMAIN,exact.example.com - 精确匹配
-# DOMAIN-KEYWORD,keyword - 包含关键词的域名
-DOMAIN-SUFFIX,heiyu.space
-DOMAIN-SUFFIX,lazycat.cloud
-DOMAIN-SUFFIX,linux.do
-#IP-CIDR,192.168.10.25/32
