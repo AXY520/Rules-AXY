@@ -193,7 +193,9 @@ rule-providers:
     path: ./rule_set/other_ruleset/trackerslist.mrs
 
   private_ip:
-    <<: *RuleSet_classical
+    # lan.txt 实际是 DOMAIN/DOMAIN-SUFFIX 列表，不包含 IP-CIDR；用 behavior: classical 会导致内网「IP 直连」无法命中
+    # 这里改成 behavior: domain，让这些 LAN 域名（.lan/.local/routerlogin 等）可以正常直连
+    <<: *RuleSet_domain
     url: https://ruleset.skk.moe/Clash/non_ip/lan.txt
     path: ./rule_set/sukkaw_ruleset/private_ip.txt
 
@@ -285,9 +287,22 @@ rule-providers:
 
 # 分流规则
 rules:
-  # 先兜住所有「局域网/私有地址」直连，避免落到 MATCH -> 漏网之鱼
-  # 说明：RULE-SET,private_ip 主要是 IP-CIDR（no-resolve），对直连访问内网 IP 最关键
-  - RULE-SET,private_ip,DIRECT,no-resolve
+  # 1) 先把所有 RFC1918/本机/链路本地 之类内网 IP 直连（不依赖 rule-provider，直接写死最稳）
+  - IP-CIDR,0.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,100.64.0.0/10,DIRECT,no-resolve
+  - IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
+  - IP-CIDR,169.254.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
+  - IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+  - IP-CIDR,224.0.0.0/4,DIRECT,no-resolve
+
+  - IP-CIDR6,::1/128,DIRECT,no-resolve
+  - IP-CIDR6,fc00::/7,DIRECT,no-resolve
+  - IP-CIDR6,fe80::/10,DIRECT,no-resolve
+
+  # 2) 再处理局域网常见域名直连（.lan/.local/routerlogin 等）
+  - RULE-SET,private_ip,DIRECT
   - RULE-SET,private_domain,DIRECT
 
   # 其他直连（原有的保留）
