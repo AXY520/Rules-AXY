@@ -168,125 +168,104 @@ proxy-groups:
 RuleSet_classical: &RuleSet_classical {type: http, behavior: classical, interval: 43200, format: text, proxy: 🚀 默认代理}
 RuleSet_domain: &RuleSet_domain {type: http, behavior: domain, interval: 43200, format: text, proxy: 🚀 默认代理}
 RuleSet_ipcidr: &RuleSet_ipcidr {type: http, behavior: ipcidr, interval: 43200, format: text, proxy: 🚀 默认代理}
-RuleSet_filter: &RuleSet_filter {type: http, behavior: domain, interval: 43200, format: mrs, proxy: 🚀 默认代理}
 
-# 订阅规则（保持原样）
+# 主流稳定规则源：DustinWin ruleset_geodata（Release 直链，不依赖各种 CDN 镜像）
+RuleSet_mrs_domain: &RuleSet_mrs_domain {type: http, behavior: domain, interval: 43200, format: mrs, proxy: 🚀 默认代理}
+RuleSet_mrs_ipcidr: &RuleSet_mrs_ipcidr {type: http, behavior: ipcidr, interval: 43200, format: mrs, proxy: 🚀 默认代理}
+
+# 订阅规则（主流稳定：DustinWin ruleset_geodata Release）
 rule-providers:
+  # DNS fake-ip 排除列表
   fakeip-filter:
-    <<: *RuleSet_filter
-    url: https://testingcf.jsdelivr.net/gh/DustinWin/ruleset_geodata@mihomo-ruleset/fakeip-filter.mrs
-    path: ./rule_set/other_ruleset/fakeip-filter.mrs
+    <<: *RuleSet_mrs_domain
+    url: https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/fakeip-filter.mrs
+    path: ./rule_set/dustinwin/fakeip-filter.mrs
 
+  # Tencent（微信/QQ 等）直连：继续沿用 blackmatrix7
+  tencent:
+    type: http
+    behavior: classical
+    interval: 86400
+    format: yaml
+    proxy: 🚀 默认代理
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Tencent/Tencent.yaml
+    path: ./rule_set/blackmatrix7/tencent.yaml
+
+  # 中国域名 / 中国IP
   cn:
-    <<: *RuleSet_filter
-    url: https://testingcf.jsdelivr.net/gh/DustinWin/ruleset_geodata@mihomo-ruleset/cn.mrs
-    path: ./rule_set/other_ruleset/cn.mrs
+    <<: *RuleSet_mrs_domain
+    url: https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cn.mrs
+    path: ./rule_set/dustinwin/cn.mrs
 
+  cnip:
+    <<: *RuleSet_mrs_ipcidr
+    url: https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/cnip.mrs
+    path: ./rule_set/dustinwin/cnip.mrs
+
+  # 私有网络（域名+IP）
   private:
-    <<: *RuleSet_filter
-    url: https://testingcf.jsdelivr.net/gh/DustinWin/ruleset_geodata@mihomo-ruleset/private.mrs
-    path: ./rule_set/other_ruleset/private.mrs
+    <<: *RuleSet_mrs_domain
+    url: https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/private.mrs
+    path: ./rule_set/dustinwin/private.mrs
+
+  privateip:
+    <<: *RuleSet_mrs_ipcidr
+    url: https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/privateip.mrs
+    path: ./rule_set/dustinwin/privateip.mrs
+
+  # 广告/追踪
+  ads:
+    <<: *RuleSet_mrs_domain
+    url: https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/ads.mrs
+    path: ./rule_set/dustinwin/ads.mrs
 
   trackerslist:
-    <<: *RuleSet_filter
-    url: https://testingcf.jsdelivr.net/gh/DustinWin/ruleset_geodata@mihomo-ruleset/trackerslist.mrs
-    path: ./rule_set/other_ruleset/trackerslist.mrs
+    <<: *RuleSet_mrs_domain
+    url: https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/trackerslist.mrs
+    path: ./rule_set/dustinwin/trackerslist.mrs
 
-  private_ip:
-    # lan.txt 实际是 DOMAIN/DOMAIN-SUFFIX 列表，不包含 IP-CIDR；用 behavior: classical 会导致内网「IP 直连」无法命中
-    # 这里改成 behavior: domain，让这些 LAN 域名（.lan/.local/routerlogin 等）可以正常直连
-    <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/non_ip/lan.txt
-    path: ./rule_set/sukkaw_ruleset/private_ip.txt
+  # 代理分流（国内外）
+  proxy:
+    <<: *RuleSet_mrs_domain
+    url: https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/proxy.mrs
+    path: ./rule_set/dustinwin/proxy.mrs
 
-  private_domain:
-    <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/domainset/direct.txt
-    path: ./rule_set/sukkaw_ruleset/private_domain.txt
+  gfw:
+    <<: *RuleSet_mrs_domain
+    url: https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/gfw.mrs
+    path: ./rule_set/dustinwin/gfw.mrs
 
-  proxylite:
-    <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/domainset/global.txt
-    path: ./rule_set/sukkaw_ruleset/proxylite.txt
+  # 业务分流
+  google:
+    <<: *RuleSet_mrs_domain
+    url: https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/google-cn.mrs
+    path: ./rule_set/dustinwin/google-cn.mrs
+
+  youtube:
+    <<: *RuleSet_mrs_domain
+    url: https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/youtube.mrs
+    path: ./rule_set/dustinwin/youtube.mrs
+
+  microsoft:
+    <<: *RuleSet_mrs_domain
+    url: https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/microsoft-cn.mrs
+    path: ./rule_set/dustinwin/microsoft-cn.mrs
+
+  telegramip:
+    <<: *RuleSet_mrs_ipcidr
+    url: https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/telegramip.mrs
+    path: ./rule_set/dustinwin/telegramip.mrs
 
   ai:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/ai.txt
-    path: ./rule_set/sukkaw_ruleset/ai.txt
-
-  github_domain:
-    <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/domainset/github.txt
-    path: ./rule_set/sukkaw_ruleset/github_domain.txt
-
-  youtube_domain:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/stream.txt
-    path: ./rule_set/sukkaw_ruleset/youtube_domain.txt
-
-  google_domain:
-    <<: *RuleSet_domain
-    url: https://rule.kelee.one/Clash/Google.yaml
-    path: ./rule_set/sukkaw_ruleset/Google.yaml
-
-  onedrive_domain:
-    <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/domainset/microsoft.txt
-    path: ./rule_set/sukkaw_ruleset/onedrive_domain.txt
-
-  microsoft_domain:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/microsoft.txt
-    path: ./rule_set/sukkaw_ruleset/microsoft_domain.txt
-
-  apple_domain:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/apple_services.txt
-    path: ./rule_set/sukkaw_ruleset/apple_domain.txt
-
-  apple_cdn:
-    <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/domainset/apple_cdn.txt
-    path: ./rule_set/sukkaw_ruleset/apple_cdn.txt
-
-  download:
-    <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/domainset/download.txt
-    path: ./rule_set/sukkaw_ruleset/download.txt
-
-  telegram_domain:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/telegram.txt
-    path: ./rule_set/sukkaw_ruleset/telegram_domain.txt
-
-  geolocation-!cn:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/non_ip/global.txt
-    path: ./rule_set/sukkaw_ruleset/geolocation-!cn.txt
-
-  cn_domain:
-    <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/domainset/cn.txt
-    path: ./rule_set/sukkaw_ruleset/cn_domain.txt
-
-  cn_ip:
-    <<: *RuleSet_classical
-    url: https://ruleset.skk.moe/Clash/ip/domestic.txt
-    path: ./rule_set/sukkaw_ruleset/cn_ip.txt
-
-  ad:
-    <<: *RuleSet_domain
-    url: https://ruleset.skk.moe/Clash/domainset/reject.txt
-    path: ./rule_set/sukkaw_ruleset/ad.txt
-
-  tencent:
-    <<: *RuleSet_classical
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Tencent/Tencent.yaml
-    path: ./rule_set/sukkaw_ruleset/tencent.yaml
-    interval: 86400
+    <<: *RuleSet_mrs_domain
+    url: https://github.com/DustinWin/ruleset_geodata/releases/download/mihomo-ruleset/ai.mrs
+    path: ./rule_set/dustinwin/ai.mrs
 
 # 分流规则
 rules:
+  # 0) fake-ip filter 规则集（必须在 rules 里显式引用，避免 fake-ip-filter 中的 `rule-set:` 无效）
+  - RULE-SET,fakeip-filter,DIRECT
+
   # 1) 先把所有 RFC1918/本机/链路本地 之类内网 IP 直连（不依赖 rule-provider，直接写死最稳）
   - IP-CIDR,0.0.0.0/8,DIRECT,no-resolve
   - IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
@@ -301,29 +280,33 @@ rules:
   - IP-CIDR6,fc00::/7,DIRECT,no-resolve
   - IP-CIDR6,fe80::/10,DIRECT,no-resolve
 
-  # 2) 再处理局域网常见域名直连（.lan/.local/routerlogin 等）
-  - RULE-SET,private_ip,DIRECT
-  - RULE-SET,private_domain,DIRECT
+  # 2) 私有网络（域名+IP）直连
+  - RULE-SET,private,DIRECT
+  - RULE-SET,privateip,DIRECT,no-resolve
 
-  # 其他直连（原有的保留）
+  # 其他直连（保留）
   - RULE-SET,tencent,DIRECT
   - DOMAIN-SUFFIX,heiyu.space,DIRECT
   - DOMAIN-SUFFIX,lazycat.cloud,DIRECT
- 
-  # 规则集（原顺序）
-  - RULE-SET,proxylite,🚀 默认代理
+
+  # 3) 广告/追踪
+  - RULE-SET,ads,REJECT
+  - RULE-SET,trackerslist,REJECT
+
+  # 4) 业务分流（按需）
   - RULE-SET,ai,🤖 AI
-  - RULE-SET,github_domain,👨🏿‍💻 GitHub
-  - RULE-SET,youtube_domain,📹 YouTube
-  - RULE-SET,google_domain,🍀 Google
-  - RULE-SET,onedrive_domain,🐬 OneDrive
-  - RULE-SET,microsoft_domain,🪟 Microsoft
-  - RULE-SET,apple_domain,DIRECT
-  - RULE-SET,apple_cdn,DIRECT
-  - RULE-SET,download,🚀 默认代理
-  - RULE-SET,telegram_domain,📲 Telegram
-  - RULE-SET,geolocation-!cn,🚀 默认代理
-  - RULE-SET,cn_domain,DIRECT
-  - RULE-SET,cn_ip,DIRECT
-  - RULE-SET,ad,💢 广告拦截
+  - RULE-SET,youtube,📹 YouTube
+  - RULE-SET,google,🍀 Google
+  - RULE-SET,microsoft,🪟 Microsoft
+  - RULE-SET,telegramip,📲 Telegram,no-resolve
+
+  # 5) 中国直连（域名+IP）
+  - RULE-SET,cn,DIRECT
+  - RULE-SET,cnip,DIRECT,no-resolve
+
+  # 6) 代理集合（国外/GFW）
+  - RULE-SET,proxy,🚀 默认代理
+  - RULE-SET,gfw,🚀 默认代理
+
+  # 7) 兜底
   - MATCH,🐟 漏网之鱼
