@@ -131,18 +131,20 @@ proxy-groups:
   - {name: 🚀 默认代理, type: select, proxies: *ProxyDefault, url: *TestUrl}
 
   # 应用分组
-  - {name: 📹 YouTube, type: select, proxies: *ProxyStreaming, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Streaming.png}
-  - {name: 🍀 Google, type: select, proxies: *ProxyGoogle, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Google.png}
-  - {name: 🤖 AI, type: select, proxies: *ProxyAI, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/OpenAI.png}
-  - {name: 👨🏿‍💻 GitHub, type: select, proxies: *ProxyGoogle, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Github.png}
-  - {name: 🪟 Microsoft, type: select, proxies: *ProxyGoogle, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Microsoft.png}
-  - {name: 🐬 OneDrive, type: select, proxies: *ProxyGoogle, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Onedrive.png}
-  - {name: 📲 Telegram, type: select, proxies: *ProxyStreaming, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Telegram.png}
+  - {name: 📹 YouTube, type: select, proxies: *ProxyStreaming, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Streaming.png}
+  - {name: 🍀 Google, type: select, proxies: *ProxyGoogle, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Google.png}
+  - {name: 🤖 AI, type: select, proxies: *ProxyAI, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/OpenAI.png}
+  - {name: 👨🏿‍💻 GitHub, type: select, proxies: *ProxyGoogle, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/github.png}
+  - {name: 🪟 Microsoft, type: select, proxies: *ProxyGoogle, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Microsoft.png}
+  # Orz-3/mini 的 Color 目录里没有 OneDrive 专用图标；用 Microsoft 作为 OneDrive 图标（同体系且稳定）
+  - {name: 🐬 OneDrive, type: select, proxies: *ProxyGoogle, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Microsoft.png}
+  - {name: 📲 Telegram, type: select, proxies: *ProxyStreaming, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Telegram.png}
   - {name: 💢 广告拦截, type: select, proxies: [DIRECT, REJECT]}
   - {name: 🐟 漏网之鱼, type: select, proxies: *ProxyDefault}
 
   # 节点选择与自动组
-  - {name: 🧭 节点选择, type: select, proxies: *ProxyNodeSelect, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Proxy.png}
+  # Orz-3/mini 的 Color 目录里没有 Proxy.png；使用 Available.png 表达“节点池/可用节点”
+  - {name: 🧭 节点选择, type: select, proxies: *ProxyNodeSelect, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Available.png}
   - {name: 📺 流媒体组, <<: *Select, filter: *FilterStreaming, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Streaming.png}
   - {name: 🛟 故障转移, <<: *Fallback, filter: *FilterAll, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Available.png}
   - {name: 🇭🇰 香港自动, <<: *Auto, filter: *FilterHK, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/HK.png}
@@ -152,7 +154,8 @@ proxy-groups:
 
   # 手动选择节点
   - {name: ♻️ 自动选择, <<: *Auto, filter: *FilterAll, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Auto.png}
-  - {name: ♻️ 手动选择, <<: *Select, filter: *FilterAll, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Select.png}
+  # Orz-3/mini 的 Color 目录里没有 Select.png；用 Manual.png 表达“手动选择”
+  - {name: ♻️ 手动选择, <<: *Select, filter: *FilterAll, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Manual.png}
   - {name: 🌐 全部节点, <<: *Select, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Global.png}
 
   # 手动选择地区节点
@@ -280,16 +283,19 @@ rule-providers:
     path: ./rule_set/sukkaw_ruleset/tencent.yaml
     interval: 86400
 
-# 分流规则（添加微信直连规则在最前面）
+# 分流规则
 rules:
-  - RULE-SET,tencent,DIRECT
-  # 自定义规则（原有的保留）
-  - DOMAIN-SUFFIX,heiyu.space,DIRECT
-  - DOMAIN-SUFFIX,lazycat.cloud,DIRECT
-
-  # 规则集（原顺序）
+  # 先兜住所有「局域网/私有地址」直连，避免落到 MATCH -> 漏网之鱼
+  # 说明：RULE-SET,private_ip 主要是 IP-CIDR（no-resolve），对直连访问内网 IP 最关键
   - RULE-SET,private_ip,DIRECT,no-resolve
   - RULE-SET,private_domain,DIRECT
+
+  # 其他直连（原有的保留）
+  - RULE-SET,tencent,DIRECT
+  - DOMAIN-SUFFIX,heiyu.space,DIRECT
+  - DOMAIN-SUFFIX,lazycat.cloud,DIRECT
+ 
+  # 规则集（原顺序）
   - RULE-SET,proxylite,🚀 默认代理
   - RULE-SET,ai,🤖 AI
   - RULE-SET,github_domain,👨🏿‍💻 GitHub
