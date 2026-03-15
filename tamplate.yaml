@@ -145,24 +145,24 @@ proxy-groups:
   # 节点选择与自动组
   # Orz-3/mini 的 Color 目录里没有 Proxy.png；使用 Available.png 表达“节点池/可用节点”
   - {name: 🧭 节点选择, type: select, proxies: *ProxyNodeSelect, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Available.png}
-  - {name: 📺 流媒体组, <<: *Select, filter: *FilterStreaming, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Streaming.png}
-  - {name: 🛟 故障转移, <<: *Fallback, filter: *FilterAll, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Available.png}
-  - {name: 🇭🇰 香港自动, <<: *Auto, filter: *FilterHK, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/HK.png}
-  - {name: 🇯🇵 日本自动, <<: *Auto, filter: *FilterJP, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/JP.png}
-  - {name: 🇸🇬 狮城自动, <<: *Auto, filter: *FilterSG, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/SG.png}
-  - {name: 🇺🇸 美国自动, <<: *Auto, filter: *FilterUS, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/US.png}
+  - {name: 📺 流媒体组, <<: *Select, filter: *FilterStreaming, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Streaming.png}
+  - {name: 🛟 故障转移, <<: *Fallback, filter: *FilterAll, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Available.png}
+  - {name: 🇭🇰 香港自动, <<: *Auto, filter: *FilterHK, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/HK.png}
+  - {name: 🇯🇵 日本自动, <<: *Auto, filter: *FilterJP, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/JP.png}
+  - {name: 🇸🇬 狮城自动, <<: *Auto, filter: *FilterSG, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/SG.png}
+  - {name: 🇺🇸 美国自动, <<: *Auto, filter: *FilterUS, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/US.png}
 
   # 手动选择节点
-  - {name: ♻️ 自动选择, <<: *Auto, filter: *FilterAll, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Auto.png}
+  - {name: ♻️ 自动选择, <<: *Auto, filter: *FilterAll, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Auto.png}
   # Orz-3/mini 的 Color 目录里没有 Select.png；用 Manual.png 表达“手动选择”
   - {name: ♻️ 手动选择, <<: *Select, filter: *FilterAll, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Manual.png}
-  - {name: 🌐 全部节点, <<: *Select, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/Global.png}
+  - {name: 🌐 全部节点, <<: *Select, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Global.png}
 
   # 手动选择地区节点
-  - {name: 🇭🇰 香港节点, <<: *Select, filter: *FilterHK, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/HK.png}
-  - {name: 🇯🇵 日本节点, <<: *Select, filter: *FilterJP, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/JP.png}
-  - {name: 🇸🇬 狮城节点, <<: *Select, filter: *FilterSG, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/SG.png}
-  - {name: 🇺🇲 美国节点, <<: *Select, filter: *FilterUS, icon: https://testingcf.jsdelivr.net/gh/Orz-3/mini@master/Color/US.png}
+  - {name: 🇭🇰 香港节点, <<: *Select, filter: *FilterHK, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/HK.png}
+  - {name: 🇯🇵 日本节点, <<: *Select, filter: *FilterJP, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/JP.png}
+  - {name: 🇸🇬 狮城节点, <<: *Select, filter: *FilterSG, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/SG.png}
+  - {name: 🇺🇲 美国节点, <<: *Select, filter: *FilterUS, icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/US.png}
 
 ### 规则配置
 RuleSet_classical: &RuleSet_classical {type: http, behavior: classical, interval: 43200, format: text, proxy: 🚀 默认代理}
