@@ -288,6 +288,7 @@ rules:
   - RULE-SET,tencent,DIRECT
   - DOMAIN-SUFFIX,heiyu.space,DIRECT
   - DOMAIN-SUFFIX,lazycat.cloud,DIRECT
+  - DOMAIN-SUFFIX,aixinyin.asia,DIRECT
   - IP-CIDR,163.192.32.92/32,DIRECT,no-resolve
   - IP-CIDR,192.9.238.12/32,DIRECT,no-resolve
 
